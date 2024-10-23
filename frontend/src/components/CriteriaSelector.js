@@ -2,12 +2,15 @@ import React from 'react';
 
 const CriteriaSelector = ({ selectedCriteria, setSelectedCriteria }) => {
   const criteriaList = [
-    { key: 'revenue', label: 'Revenue' },
-    { key: 'profit', label: 'Profit' },
-    { key: 'revenue_change', label: 'Revenue Change' },
-    { key: 'profit_change', label: 'Profit Change' },
-    { key: 'employees', label: 'Employees' },
     { key: 'assets', label: 'Assets' },
+    { key: 'employees', label: 'Employees' },
+    { key: 'profit', label: 'Profit' },
+    { key: 'profit_change', label: 'Profit Change' },
+    { key: 'rank', label: 'Rank' },
+    { key: 'revenue', label: 'Revenue' },
+    { key: 'revenue_change', label: 'Revenue Change' },
+    { key: 'years_in_rank', label: 'Years in rank' },
+
   ];
 
   const handleCheckboxChange = (e) => {

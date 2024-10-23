@@ -1,12 +1,29 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 const WeightSelector = ({ selectedCriteria, weights, setWeights }) => {
+  // Poskrbi, da so za vsak nov kriterij dodane začetne vrednosti
+  useEffect(() => {
+    const initialWeights = selectedCriteria.reduce((acc, criteria) => {
+      if (!weights.hasOwnProperty(criteria)) {  // Prepreči ponovno inicializacijo, če utež že obstaja
+        acc[criteria] = weights[criteria] || 0;  // Ohranimo že vnešene vrednosti
+      } else {
+        acc[criteria] = weights[criteria];  // Ohranimo obstoječe vrednosti
+      }
+      return acc;
+    }, {});
+
+    setWeights((prevWeights) => ({
+      ...prevWeights,
+      ...initialWeights,
+    }));
+  }, [selectedCriteria]);  // Odvisnost samo od `selectedCriteria`
+
   const handleWeightChange = (e) => {
     const { name, value } = e.target;
-    setWeights({
-      ...weights,
-      [name]: Number(value),  // Posodobi uteži na podlagi vnosa
-    });
+    setWeights((prevWeights) => ({
+      ...prevWeights,
+      [name]: Number(value),  // Posodobi vrednost za posamezen kriterij
+    }));
   };
 
   return (
@@ -18,7 +35,7 @@ const WeightSelector = ({ selectedCriteria, weights, setWeights }) => {
           <input
             type="number"
             name={criteria}
-            value={weights[criteria] || 0}  // Prikaži utež za izbrani kriterij
+            value={weights[criteria] || 0}  // Pokaži shranjeno vrednost
             onChange={handleWeightChange}
             min="0"
             max="100"
