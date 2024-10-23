@@ -2,6 +2,8 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 from get_fortune500 import get_fortune500_companies
+import json
+import os
 
 app = Flask(__name__)
 CORS(app)  # Omogoči CORS za vse zahteve
@@ -10,6 +12,14 @@ CORS(app)  # Omogoči CORS za vse zahteve
 @app.route('/', methods=['GET'])
 def home():
     return "Flask server is running", 200
+
+@app.route('/api/companies/json', methods=['GET'])
+def get_companies_from_json():
+    json_file_path = os.path.join(os.path.dirname(__file__), 'companies.json')
+    with open(json_file_path) as f:
+        companies = json.load(f)
+    return companies
+
 
 @app.route('/api/companies', methods=['GET'])
 def get_companies():
