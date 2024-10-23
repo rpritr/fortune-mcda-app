@@ -4,15 +4,54 @@ from flask_cors import CORS
 from get_fortune500 import get_fortune500_companies
 import json
 import os
+from pymongo import MongoClient
 
 app = Flask(__name__)
 CORS(app)  # Omogoči CORS za vse zahteve
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 
+client = MongoClient("mongodb://mongo:27017/")  # To je ime storitve Mongo iz docker-compose.yml
+db = client.investment_support_system  # Ustvari (ali dostopa do) bazo podatkov
+
+# Testna zbirka podatkov
+companies_collection = db.companies
+
+# API za uvoz podatkov iz JSON datoteke
+@app.route('/api/import_companies', methods=['POST'])
+def import_companies():
+    try:
+        # Pot do datoteke
+        json_file_path = os.path.join(os.path.dirname(__file__), 'companies.json')
+        
+        # Odpremo in preberemo datoteko
+        with open(json_file_path, 'r') as file:
+            companies = json.load(file)
+        
+        # Uvozimo podatke v zbirko companies
+        companies_collection.insert_many(companies)
+        return jsonify({"message": "Companies successfully imported!"}), 201
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+
 # API za pridobivanje Fortune 500 podjetij
 @app.route('/', methods=['GET'])
 def home():
     return "Flask server is running", 200
+
+@app.route('/api/companies', methods=['GET'])
+def get_companies():
+    companies = list(companies_collection.find({}, {'_id': 0}))  # Vrne vse zapise brez '_id'
+    return jsonify(companies), 200
+
+@app.route('/api/companies', methods=['POST'])
+def add_company():
+    data = request.json
+    companies_collection.insert_one(data)  # Doda novo podjetje v zbirko
+    return jsonify({"message": "Company added successfully"}), 201
+
 
 @app.route('/api/companies/json', methods=['GET'])
 def get_companies_from_json():
@@ -22,8 +61,8 @@ def get_companies_from_json():
     return companies
 
 
-@app.route('/api/companies', methods=['GET'])
-def get_companies():
+@app.route('/api/v0/companies', methods=['GET'])
+def get_companies_v0():
     try:
         companies = get_fortune500_companies()
         return jsonify(companies), 200

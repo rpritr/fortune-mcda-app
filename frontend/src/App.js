@@ -22,7 +22,7 @@ const App = () => {
     // Pridobi podjetja iz našega Flask API-ja
     const fetchCompanies = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/companies/json');
+        const response = await axios.get('http://localhost:8000/api/companies');
         setCompanies(response.data);
       } catch (error) {
         console.error('Error fetching companies:', error);
