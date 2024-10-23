@@ -22,7 +22,7 @@ const App = () => {
     // Pridobi podjetja iz našega Flask API-ja
     const fetchCompanies = async () => {
       try {
-        const response = await axios.get('http://localhost:5001/api/companies/json');
+        const response = await axios.get('http://localhost:8000/api/companies/json');
         setCompanies(response.data);
       } catch (error) {
         console.error('Error fetching companies:', error);
@@ -63,7 +63,7 @@ const App = () => {
 
     // Tukaj boš kasneje dodal logiko za izračun MCDA
     try {
-      const response = await fetch('http://localhost:5001/api/mcda/wsm', {
+      const response = await fetch('http://localhost:8000/api/mcda/wsm', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -7,6 +7,7 @@ import os
 
 app = Flask(__name__)
 CORS(app)  # Omogoči CORS za vse zahteve
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 
 # API za pridobivanje Fortune 500 podjetij
 @app.route('/', methods=['GET'])
@@ -123,4 +124,4 @@ def wsm(companies, weights):
     return sorted(results, key=lambda x: x['score'], reverse=True)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    app.run(debug=True, host='0.0.0.0', port=5000)

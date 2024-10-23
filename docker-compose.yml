@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  flask-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:5000"  # Zunanji port : port v kontejnerju
+    networks:
+      - app-network
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/investment_support_system
+    depends_on:
+      - mongo
+    volumes:
+      - ./backend:/app
+
+  react-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"  # React aplikacija bo dosegljiva na portu 3000
+    networks:
+      - app-network
+    depends_on:
+      - flask-backend
+
+  mongo:
+    image: mongo:4.4
+    ports:
+      - "27017:27017"  # MongoDB bo dosegljiv na portu 27017
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
+
+networks:
+  app-network:
