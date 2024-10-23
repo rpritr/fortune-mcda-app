@@ -53,8 +53,13 @@ const App = () => {
         selectedCriteria={selectedCriteria}
         setSelectedCriteria={setSelectedCriteria}
       />
-      <WeightSelector weights={weights} setWeights={setWeights} />
-
+      {selectedCriteria.length > 0 && (
+        <WeightSelector
+          selectedCriteria={selectedCriteria}
+          weights={weights}
+          setWeights={setWeights}
+        />
+      )}
       <MethodSelector
         selectedMethod={selectedMethod}
         setSelectedMethod={setSelectedMethod}
