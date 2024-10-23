@@ -24,6 +24,11 @@ const CriteriaSelector = ({ selectedCriteria, setSelectedCriteria }) => {
 
   return (
     <div>
+     <div className="card mb-4">
+        <div className="card-header">
+          <h2>Select Criteria for Analysis</h2>
+        </div>
+        <div className="card-body">
       <h2>Select Criteria for Analysis</h2>
       {criteriaList.map((criteria) => (
         <div key={criteria.key}>
@@ -36,7 +41,10 @@ const CriteriaSelector = ({ selectedCriteria, setSelectedCriteria }) => {
           <label>{criteria.label}</label>
         </div>
       ))}
-    </div>
+      </div>
+      </div>
+      </div>
+
   );
 };
 

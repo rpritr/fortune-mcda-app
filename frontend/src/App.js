@@ -83,29 +83,47 @@ const App = () => {
   };
 
   return (
-    <div>
-      <h1>Investment Decision Support System</h1>
-      <CompanySelector
-        selectedCompanies={selectedCompanies}
-        setSelectedCompanies={setSelectedCompanies}
-        companies={companies}  // Dodaj podjetja, ki jih pridobiš iz Flask API-ja
-      />
-      <CriteriaSelector
-        selectedCriteria={selectedCriteria}
-        setSelectedCriteria={setSelectedCriteria}
-      />
+    <div className="container my-5">
+      <h1 className="text-center mb-4">Investment Decision Support System</h1>
+          <CompanySelector
+            selectedCompanies={selectedCompanies}
+            setSelectedCompanies={setSelectedCompanies}
+            companies={companies}
+          />     
+          <CriteriaSelector
+            selectedCriteria={selectedCriteria}
+            setSelectedCriteria={setSelectedCriteria}
+          />
+      {/* Vnos uteži za izbrane kriterije */}
       {selectedCriteria.length > 0 && (
-        <WeightSelector
-          selectedCriteria={selectedCriteria}
-          weights={weights}
-          setWeights={setWeights}
-        />
+        
+            <WeightSelector
+              selectedCriteria={selectedCriteria}
+              weights={weights}
+              setWeights={setWeights}
+            />
+      
       )}
-      <MethodSelector
-        selectedMethod={selectedMethod}
-        setSelectedMethod={setSelectedMethod}
-      />
-      <button onClick={handleSubmit}>Submit</button>
+
+      {/* Izbor MCDA metode */}
+      <div className="card mb-4">
+        <div className="card-header">
+          <h2>Select MCDA Method</h2>
+        </div>
+        <div className="card-body">
+          <MethodSelector
+            selectedMethod={selectedMethod}
+            setSelectedMethod={setSelectedMethod}
+          />
+        </div>
+      </div>
+
+     {/* Gumb za pošiljanje */}
+     <div className="text-center">
+        <button className="btn btn-primary btn-lg" onClick={handleSubmit}>
+          Submit
+        </button>
+      </div>
     </div>
   );
 };

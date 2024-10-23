@@ -13,18 +13,25 @@ const CompanySelector = ({ selectedCompanies, setSelectedCompanies, companies })
 
   return (
     <div>
-      <h2>Select Companies</h2>
-      {companies.map((company, index) => (
-        <div key={index}>
-          <input
-            type="checkbox"
-            value={company.name}
-            onChange={(e) => handleCheckboxChange(e, company)}
-            checked={!!selectedCompanies.find((selected) => selected.name === company.name)}
-          />
-          <label>{company.name} - Revenue: {company.revenue}, Profit: {company.profit}</label>
-        </div>
-      ))}
+      <div className="card mb-4">
+          <div className="card-header">
+            <h2>Select Companies</h2>
+          </div>
+          <div className="card-body">
+        <h2>Select Companies</h2>
+        {companies.map((company, index) => (
+          <div key={index}>
+            <input
+              type="checkbox"
+              value={company.name}
+              onChange={(e) => handleCheckboxChange(e, company)}
+              checked={!!selectedCompanies.find((selected) => selected.name === company.name)}
+            />
+            <label>{company.name} - Revenue: {company.revenue}, Profit: {company.profit}</label>
+          </div>
+        ))}
+      </div>
+      </div>
     </div>
   );
 };
