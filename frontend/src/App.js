@@ -17,6 +17,8 @@ const App = () => {
     employees: 0,
   });
   const [selectedCriteria, setSelectedCriteria] = useState([]);
+  const [wsmResults, setWsmResults] = useState([]);  // Novo stanje za WSM rezultate
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     // Pridobi podjetja iz našega Flask API-ja
@@ -50,6 +52,24 @@ const App = () => {
     console.log('Selected Criteria:', selectedCriteria);
     console.log('Selected weights:', weights);
 
+    let apiUrl = '';
+
+    // Odvisno od izbrane metode določimo pravi API URL
+    switch (selectedMethod) {
+      case 'WSM':
+        apiUrl = 'http://localhost:8000/api/mcda/wsm';
+        break;
+      case 'TOPSIS':
+        apiUrl = 'http://localhost:8000/api/mcda/topsis';
+        break;
+      case 'AHP':
+        apiUrl = 'http://localhost:8000/api/mcda/ahp';
+        break;
+      default:
+        alert("Please select a valid MCDA method.");
+        return;
+    }
+  
     const totalWeight = Object.values(weights).reduce((a, b) => a + b, 0);
 
     if (totalWeight !== 100) {
@@ -63,7 +83,7 @@ const App = () => {
 
     // Tukaj boš kasneje dodal logiko za izračun MCDA
     try {
-      const response = await fetch('http://localhost:8000/api/mcda/wsm', {
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -76,6 +96,7 @@ const App = () => {
       }
   
       const data = await response.json();
+      setWsmResults(data);  // Shranimo rezultate v stanje
       console.log('WSM Results:', data);
     } catch (error) {
       console.error('Error fetching WSM results:', error);
@@ -121,10 +142,27 @@ const App = () => {
      {/* Gumb za pošiljanje */}
      <div className="text-center">
         <button className="btn btn-primary btn-lg" onClick={handleSubmit}>
-          Submit
+          Run
         </button>
       </div>
+      <div className="results mt-5">
+      
+        {error && <p className="text-danger">{error}</p>}
+        {wsmResults.length > 0 && (
+          <div>
+            <h2>WSM Results</h2>
+            <ul className="list-group">
+              {wsmResults.map((result, index) => (
+                <li key={index} className="list-group-item">
+                  <strong>{result.name}</strong>: {result.score.toFixed(2)}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
     </div>
+    
   );
 };
 
