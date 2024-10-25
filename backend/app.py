@@ -15,6 +15,7 @@ db = client.investment_support_system  # Ustvari (ali dostopa do) bazo podatkov
 
 # Testna zbirka podatkov
 companies_collection = db.companies
+calculations_collection = db.calculations  # Nova zbirka za shranjevanje izračunov
 
 # API za uvoz podatkov iz JSON datoteke
 @app.route('/api/import_companies', methods=['POST'])
@@ -90,6 +91,15 @@ def wsm_api():
 
         # Izračunaj WSM rezultat
         results = wsm(companies, weights)
+
+        # Shranimo izračun v zbirko calculations
+        calculation_record = {
+            'companies': companies,
+            'weights': weights,
+            'results': results
+        }
+        calculations_collection.insert_one(calculation_record)  # Shranimo izračun
+        
 
         return jsonify(results), 200
     except Exception as e:
