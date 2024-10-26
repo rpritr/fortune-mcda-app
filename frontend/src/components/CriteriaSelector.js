@@ -1,6 +1,6 @@
 import React from 'react';
 
-const CriteriaSelector = ({ selectedCriteria, setSelectedCriteria }) => {
+const CriteriaSelector = ({ selectedCriteria, setSelectedCriteria, isBenefit, setIsBenefit }) => {
   const criteriaList = [
     { key: 'assets', label: 'Assets' },
     { key: 'employees', label: 'Employees' },
@@ -13,13 +13,19 @@ const CriteriaSelector = ({ selectedCriteria, setSelectedCriteria }) => {
 
   ];
 
-  const handleCheckboxChange = (e) => {
-    const { name, checked } = e.target;
-    if (checked) {
-      setSelectedCriteria([...selectedCriteria, name]);
+  const handleCheckboxChange = (e, criterion) => {
+    if (selectedCriteria.includes(criterion)) {
+      setSelectedCriteria(selectedCriteria.filter((item) => item !== criterion));
     } else {
-      setSelectedCriteria(selectedCriteria.filter((item) => item !== name));
+      setSelectedCriteria([...selectedCriteria, criterion]);
     }
+  };
+
+  const handleIsBenefitChange = (e, criterion) => {
+    setIsBenefit({
+      ...isBenefit,
+      [criterion]: e.target.checked,  // Posodobimo vrednost isBenefit za izbrani kriterij
+    });
   };
 
   return (
@@ -36,9 +42,23 @@ const CriteriaSelector = ({ selectedCriteria, setSelectedCriteria }) => {
             type="checkbox"
             name={criteria.key}
             checked={selectedCriteria.includes(criteria.key)}
-            onChange={handleCheckboxChange}
-          />
+            onChange={(e) => handleCheckboxChange(e, criteria.key)}
+            />
           <label>{criteria.label}</label>
+          {selectedCriteria.includes(criteria.key) && (
+                <div className="form-check form-switch ms-4" key={`${criteria.key}-benefit`}>
+                  <input
+                    type="checkbox"
+                    className="form-check-input"
+                    id={`${criteria.key}-isBenefit`}
+                  //  checked={isBenefit[criteria.key] || false}
+                    onChange={(e) => handleIsBenefitChange(e, criteria.key)}
+                  />
+                  <label className="form-check-label" htmlFor={`${criteria.key}-isBenefit`}>
+                    Is Benefit?
+                  </label>
+                </div>
+              )}
         </div>
       ))}
       </div>
