@@ -19,6 +19,7 @@ const App = () => {
   const [selectedCriteria, setSelectedCriteria] = useState([]);
   const [wsmResults, setWsmResults] = useState([]);  // Novo stanje za WSM rezultate
   const [error, setError] = useState(null);
+  const [isBenefit, setIsBenefit] = useState({});  // Initialize isBenefit as an object
 
   useEffect(() => {
     // Pridobi podjetja iz našega Flask API-ja
@@ -44,6 +45,12 @@ const App = () => {
     const payload = {
       companies: selectedCompanies,
       weights: weights,
+      is_benefit: {
+        revenue: true,  // Primer: prihodki so benefit (več je bolje)
+        profit: true,   // Dobiček je benefit
+        revenueGrowth: true,
+        employees: false  // Število zaposlenih bi lahko bil cost kriterij (manjše je bolje)
+      }
     };
 
     
@@ -105,7 +112,7 @@ const App = () => {
 
   return (
     <div className="container my-5">
-      <h1 className="text-center mb-4">Investment Decision Support System</h1>
+      <h1 className="text-center mb-4">Investment Decision Support System - MDSA</h1>
           <CompanySelector
             selectedCompanies={selectedCompanies}
             setSelectedCompanies={setSelectedCompanies}
@@ -114,6 +121,7 @@ const App = () => {
           <CriteriaSelector
             selectedCriteria={selectedCriteria}
             setSelectedCriteria={setSelectedCriteria}
+            setIsBenefit={setIsBenefit} 
           />
       {/* Vnos uteži za izbrane kriterije */}
       {selectedCriteria.length > 0 && (
