@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from models.db_config import db
-from services.mcda_calculations import wsm, topsis
+from services.mcda_calculations import wsm, topsis, ahp
 import numpy as np
 
 mcda_routes = Blueprint('mcda_routes', __name__)
@@ -30,3 +30,33 @@ def topsis_api():
     response_data = [{"name": companies[i]['name'], "score": results[i]} for i in range(len(companies))]
     calculations_collection.insert_one({'method': 'TOPSIS', 'companies': companies, 'weights': weights, 'results': response_data})
     return jsonify(response_data), 200
+
+@mcda_routes.route('/ahp', methods=['POST'])
+def ahp_api():
+    try:
+        data = request.json
+        matrix = np.array(data['criteriaMatrix'])  # Pričakujemo matriko parnih primerjav
+
+        # Izvedemo AHP analizo
+        weights, consistency_ratio, consistency_message = ahp(matrix)
+
+        # Shranimo rezultate v zbirko
+        calculation_record = {
+            'method': 'AHP',
+            'matrix': matrix.tolist(),
+            'weights': weights.tolist(),
+            'consistency_ratio': consistency_ratio,
+            'message': consistency_message
+        }
+        calculations_collection.insert_one(calculation_record)
+
+        # Pripravimo odziv
+        response_data = {
+            "weights": weights.tolist(),
+            "consistency_ratio": consistency_ratio,
+            "message": consistency_message
+        }
+        return jsonify(response_data), 200
+    except Exception as e:
+        print("Error in AHP API:", e)
+        return jsonify({'error': str(e)}), 500
