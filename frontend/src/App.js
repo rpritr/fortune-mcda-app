@@ -87,10 +87,13 @@ const App = () => {
   
   const handleSubmit = async () => {
 
-    if (selectedCompanies.length === 0 || Object.values(weights).reduce((a, b) => a + b, 0) !== 100) {
-      alert("Please select companies and ensure weights total 100%");
-      return;
+    if(selectedMethod !== "AHP") {
+      if (selectedCompanies.length === 0 || Object.values(weights).reduce((a, b) => a + b, 0) !== 100) {
+        alert("Please select companies and ensure weights total 100%");
+        return;
+      }
     }
+
     let payload = {
       companies: selectedCompanies,
       weights: weights,
@@ -129,7 +132,7 @@ const App = () => {
   
     const totalWeight = Object.values(weights).reduce((a, b) => a + b, 0);
 
-    if (totalWeight !== 100) {
+    if (selectedMethod !== "AHP" && totalWeight !== 100) {
       alert('Total weights must equal 100%.');
     } else {
       console.log('Selected Criteria:', selectedCriteria);
@@ -175,30 +178,8 @@ const App = () => {
             selectedCompanies={selectedCompanies}
             setSelectedCompanies={setSelectedCompanies}
             companies={companies}
-          />     
-          <CriteriaSelector
-            selectedCriteria={selectedCriteria}
-            setSelectedCriteria={setSelectedCriteria}
-            setIsBenefit={setIsBenefit} 
           />
-          <PairwiseComparison
-        selectedCriteria={selectedCriteria}
-        userInputs={userInputs}
-        setUserInputs={setUserInputs}
-      />
-      {/* Vnos uteži za izbrane kriterije */}
-      {selectedCriteria.length > 0 && (
-        
-            <WeightSelector
-              selectedCriteria={selectedCriteria}
-              weights={weights}
-              setWeights={setWeights}
-            />
-      
-      )}
-
-      {/* Izbor MCDA metode */}
-      <div className="card mb-4">
+          <div className="card mb-4">
         <div className="card-header">
           <h2>Select MCDA Method</h2>
         </div>
@@ -209,6 +190,31 @@ const App = () => {
           />
         </div>
       </div>
+           
+          <CriteriaSelector
+            selectedCriteria={selectedCriteria}
+            setSelectedCriteria={setSelectedCriteria}
+            setIsBenefit={setIsBenefit} 
+          />
+         {selectedMethod === 'AHP' && (
+            <PairwiseComparison
+          selectedCriteria={selectedCriteria}
+          userInputs={userInputs}
+          setUserInputs={setUserInputs}
+        />
+          )}
+      {/* Vnos uteži za izbrane kriterije */}
+      {selectedCriteria.length > 0 && selectedMethod !== 'AHP' && (
+            <WeightSelector
+              selectedCriteria={selectedCriteria}
+              weights={weights}
+              setWeights={setWeights}
+            />
+      
+      )}
+
+      {/* Izbor MCDA metode */}
+      
 
      {/* Gumb za pošiljanje */}
      <div className="text-center">
