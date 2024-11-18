@@ -6,6 +6,7 @@ import numpy as np
 mcda_routes = Blueprint('mcda_routes', __name__)
 calculations_collection = db.calculations
 
+# POST zahtevek za WSM metodo, prejme podatke in vstavi zapis v DB, vrne rezultat WSM metode
 @mcda_routes.route('/wsm', methods=['POST'])
 def wsm_api():
     data = request.json
@@ -15,6 +16,7 @@ def wsm_api():
     calculations_collection.insert_one({'method': 'WSM', 'companies': companies, 'weights': weights, 'results': results})
     return jsonify(results), 200
 
+# POST zahtevek za TOPSIS metodo, prejme podatke in vstavi zapis v DB, vrne rezultat WSM metode
 @mcda_routes.route('/topsis', methods=['POST'])
 def topsis_api():
     data = request.json
@@ -31,6 +33,7 @@ def topsis_api():
     calculations_collection.insert_one({'method': 'TOPSIS', 'companies': companies, 'weights': weights, 'results': response_data})
     return jsonify(response_data), 200
 
+# POST zahtevek za AHP metodo, prejme podatke in vstavi zapis v DB, vrne rezultat WSM metode
 @mcda_routes.route('/ahp', methods=['POST'])
 def ahp_api():
     try:
