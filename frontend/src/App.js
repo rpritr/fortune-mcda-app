@@ -6,6 +6,7 @@ import MethodSelector from './components/MethodSelector';
 import WeightSelector from './components/WeightSelector';  // Uvozi komponento
 import CriteriaSelector from './components/CriteriaSelector';
 import PairwiseComparison from './components/PairwiseComparison';
+import ComparisonChart from './components/ComparisonChart';
 
 const App = () => {
   const [selectedCompanies, setSelectedCompanies] = useState([]);
@@ -22,7 +23,13 @@ const App = () => {
   const [ahpResults, setAHPResults] = useState([]);  // stanje za AHP rezultate
   const [prometheeResults, setPrometheeResults] = useState([]); // stanje za PROMETHEE rezultate
   const [userInputs, setUserInputs] = useState({});
-
+  const [analysisReport, setAnalysisReport] = useState([]); // analiza vseh metod
+  const analysisReportDemo = [
+    { company: 'Walmart', WSM: 60, TOPSIS: 55, AHP: 70, PROMETHEE: 65 },
+    { company: 'Amazon', WSM: 58, TOPSIS: 60, AHP: 68, PROMETHEE: 66 },
+    { company: 'State Grid', WSM: 59, TOPSIS: 58, AHP: 65, PROMETHEE: 64 },
+  ];
+  
   const [error, setError] = useState(null);
   const [isBenefit, setIsBenefit] = useState({});  // Initialize isBenefit as an object
   const [companyScores, setCompanyScores] = useState([]); // Dodano stanje za rezultate podjetij
@@ -188,11 +195,27 @@ const App = () => {
   
       const data = await response.json();
       console.log('Analysis Results:', data);
+      // Dynamically update `analysisReport` with results for the current method
+    const updatedReport = selectedCompanies.map((company, index) => {
+      const existingEntry =
+        analysisReport.find((entry) => entry.company === company.name) || { company: company.name };
+
+      return {
+        ...existingEntry,
+        [selectedMethod]: data[index]?.score || 0, // Add or update the score for the selected method
+      };
+    });
+
+    setAnalysisReport(updatedReport); // Update the analysis report
+    console.log("Updated Analysis Report:", updatedReport);
+      
+      console.log(analysisReport);
 
       if (selectedMethod === 'AHP') {
         setAHPResults(data);  // Nastavi rezultate AHP metode
         console.log(data)
         console.log(wsmResults)
+       
       } 
       else if (selectedMethod === 'PROMETHEE') {
         setPrometheeResults(data);
@@ -303,7 +326,7 @@ const App = () => {
     <h2>PROMETHEE Results</h2>
     <ul>
       {prometheeResults.map((result, index) => (
-        <li key={index}>{result.name}: {result.phi.toFixed(2)}</li>
+        <li key={index}>{result.name}: {result.score.toFixed(2)}</li>
       ))}
     </ul>
   </div>
@@ -318,22 +341,27 @@ const App = () => {
           <th>Company</th>
           <th>Phi Plus</th>
           <th>Phi Minus</th>
-          <th>Phi</th>
+          <th>Score</th>
         </tr>
       </thead>
       <tbody>
-        {prometheeResults.results.map((result, index) => (
+        {prometheeResults.map((result, index) => (
           <tr key={index}>
-            <td>{result.name}</td>
-            <td>{result.phi_plus.toFixed(2)}</td>
-            <td>{result.phi_minus.toFixed(2)}</td>
-            <td>{result.phi.toFixed(2)}</td>
+            <td>{name}</td>
+            <td>{phi_plus.toFixed(2)}</td>
+            <td>{phi_minus.toFixed(2)}</td>
+            <td>{score.toFixed(2)}</td>
           </tr>
         ))}
       </tbody>
     </table>
   </div>
 )}
+<div>
+      {/* Drugi deli aplikacije */}
+      <h2>Primerjava rezultatov MCDA metod</h2>
+      <ComparisonChart data={analysisReport} />
+    </div>
     </div>
     
   );
