@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from models.db_config import db
-from services.mcda_calculations import wsm, topsis, ahp
+from services.mcda_calculations import wsm, topsis, ahp, promethee
 import numpy as np
 
 mcda_routes = Blueprint('mcda_routes', __name__)
@@ -62,4 +62,34 @@ def ahp_api():
         return jsonify(response_data), 200
     except Exception as e:
         print("Error in AHP API:", e)
+        return jsonify({'error': str(e)}), 500
+
+# POST zahtevek za PROMETHEE metodo, prejme podatke in vstavi zapis v DB, vrne rezultat WSM metode
+@mcda_routes.route('/promethee', methods=['POST'])
+def promethee_api():
+    try:
+        data = request.json
+        print("Data:", data)  # Izpis napake
+        matrix = np.array(data['criteriaMatrix'])  # Pričakujemo matriko parnih primerjav
+        weights = np.array(data['weights'])
+        is_benefit = data['is_benefit']
+        p = data.get('p', 0.5)
+        q = data.get('q', 0.1)
+
+        phi_plus, phi_minus, phi = promethee(matrix, weights, is_benefit, p, q)
+
+       # Pripravimo odziv z rezultati
+        response_data = {
+            "results": [
+                {
+                    "name": data["companies"][i]["name"],  # Podjetje iz vhodnih podatkov
+                    "phi_plus": phi_plus[i],
+                    "phi_minus": phi_minus[i],
+                    "phi": phi[i]
+                }
+                for i in range(len(phi))
+            ]
+        }
+        return jsonify(response_data), 200
+    except Exception as e:
         return jsonify({'error': str(e)}), 500

@@ -9,7 +9,7 @@ import PairwiseComparison from './components/PairwiseComparison';
 
 const App = () => {
   const [selectedCompanies, setSelectedCompanies] = useState([]);
-  const [selectedMethod, setSelectedMethod] = useState('AHP');
+  const [selectedMethod, setSelectedMethod] = useState('WSM');
   const [companies, setCompanies] = useState([]);
   const [weights, setWeights] = useState({
     revenue: 0,
@@ -18,8 +18,9 @@ const App = () => {
     employees: 0,
   });
   const [selectedCriteria, setSelectedCriteria] = useState([]);
-  const [wsmResults, setWsmResults] = useState([]);  // Novo stanje za WSM rezultate
-  const [ahpResults, setAHPResults] = useState([]);  // Novo stanje za WSM rezultate
+  const [wsmResults, setWsmResults] = useState([]);  // stanje za WSM rezultate
+  const [ahpResults, setAHPResults] = useState([]);  // stanje za AHP rezultate
+  const [prometheeResults, setPrometheeResults] = useState([]); // stanje za PROMETHEE rezultate
   const [userInputs, setUserInputs] = useState({});
 
   const [error, setError] = useState(null);
@@ -36,8 +37,7 @@ const App = () => {
         console.error('Error fetching companies:', error);
       }
     };
-
-    fetchCompanies();
+ fetchCompanies();
   }, []);
 
     // Izračunaj in shrani rezultate podjetij po pridobitvi rezultatov AHP
@@ -49,6 +49,32 @@ const App = () => {
       }
     }, [ahpResults, companies, selectedCriteria]);
 
+    const cleanValue = (value) => {
+      if (typeof value === 'string') {
+        // Odstrani ne-numerične znake (npr. '$', ',', '%') in pretvori v število
+        return parseFloat(value.replace(/[^0-9.-]+/g, '')) || 0;
+      }
+      return parseFloat(value) || 0;
+    };
+    const generateMatrix = (selectedCriteria, selectedCompanies) => {
+      const matrix = selectedCompanies.map((company) => {
+        return selectedCriteria.map((criterion) => {
+          const value = company[criterion];
+          return cleanValue(value); // Uporabi čistilno funkcijo
+        });
+      });
+      return matrix;
+    };
+    const generateMatrixOld = (selectedCriteria, selectedCompanies) => {
+      const matrix = selectedCompanies.map((company) => {
+        return selectedCriteria.map((criterion) => {
+          const value = parseFloat(company[criterion]) || 0; // Dobimo vrednost za kriterij
+          return value;
+        });
+      });
+      return matrix;
+    };
+    
   const generateEqualMatrix = (criteria) => {
     const size = criteria.length;
     const matrix = Array.from({ length: size }, (_, i) =>
@@ -103,14 +129,15 @@ const App = () => {
         revenueGrowth: true,
         employees: false  // Število zaposlenih bi lahko bil cost kriterij (manjše je bolje)
       },
-      criteriaMatrix: generateUserDefinedMatrix(selectedCriteria,userInputs)
+      criteriaMatrix: generateMatrix(selectedCriteria,selectedCompanies)
     };
 
     console.log('Selected Companies:', selectedCompanies);
     console.log('Selected Method:', selectedMethod);
     console.log('Selected Criteria:', selectedCriteria);
     console.log('Selected weights:', weights);
-
+    console.log('Selected Payload:', payload);
+    
     let apiUrl = '';
 
     // Odvisno od izbrane metode določimo pravi API URL
@@ -125,6 +152,9 @@ const App = () => {
         apiUrl = 'http://localhost:8000/api/mcda/ahp';
        // payload.criteriaMatrix = generateEqualMatrix(selectedCriteria);
         break;
+      case 'PROMETHEE':
+        apiUrl = 'http://localhost:8000/api/mcda/promethee';
+        break;
       default:
         alert("Please select a valid MCDA method.");
         return;
@@ -137,11 +167,12 @@ const App = () => {
     } else {
       console.log('Selected Criteria:', selectedCriteria);
       console.log('Selected Weights:', weights);
+
       // Dodaj logiko za MCDA analizo
     }
 
 
-    // Tukaj boš kasneje dodal logiko za izračun MCDA
+    // implementacija klicev na API za posamezne metode
     try {
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -162,9 +193,12 @@ const App = () => {
         setAHPResults(data);  // Nastavi rezultate AHP metode
         console.log(data)
         console.log(wsmResults)
-      } else {
+      } 
+      else if (selectedMethod === 'PROMETHEE') {
+        setPrometheeResults(data);
+      }
+      else {
         setWsmResults(data);  // Nastavi rezultate za WSM in TOPSIS metode
-        
       }
     } catch (error) {
       console.error('Error fetching WSM results:', error);
@@ -264,6 +298,42 @@ const App = () => {
         </div>
       )}
       </div>
+      {selectedMethod === 'PROMETHEE' && prometheeResults.length > 0 && (
+  <div>
+    <h2>PROMETHEE Results</h2>
+    <ul>
+      {prometheeResults.map((result, index) => (
+        <li key={index}>{result.name}: {result.phi.toFixed(2)}</li>
+      ))}
+    </ul>
+  </div>
+)}
+
+{selectedMethod === 'PROMETHEE' && prometheeResults.results && (
+  <div>
+    <h2>PROMETHEE Results</h2>
+    <table className="table">
+      <thead>
+        <tr>
+          <th>Company</th>
+          <th>Phi Plus</th>
+          <th>Phi Minus</th>
+          <th>Phi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {prometheeResults.results.map((result, index) => (
+          <tr key={index}>
+            <td>{result.name}</td>
+            <td>{result.phi_plus.toFixed(2)}</td>
+            <td>{result.phi_minus.toFixed(2)}</td>
+            <td>{result.phi.toFixed(2)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
     </div>
     
   );

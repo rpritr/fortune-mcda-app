@@ -7,14 +7,17 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:5000"  # Zunanji port : port v kontejnerju
+      - "5679:5679"  # Debugging port
     networks:
       - app-network
     environment:
+      - FLASK_ENV=development
       - MONGO_URI=mongodb://mongo:27017/investment_support_system
     depends_on:
       - mongo
     volumes:
       - ./backend:/app
+    entrypoint: [ "python", "-m", "debugpy", "--listen", "0.0.0.0:5679", "-m", "app",  "--wait-for-client", "--multiprocess", "-m", "flask", "run", "-h", "0.0.0.0", "-p", "5000" ]
 
   react-frontend:
     build:

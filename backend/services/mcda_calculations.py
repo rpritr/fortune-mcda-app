@@ -1,5 +1,6 @@
 import numpy as np
 from utils.helpers import clean_value
+from services.helpers import preference_function
 
 #  Algoritem očisti vrednosti in jih pomnoži z utežmi
 # Rezultat je urejen seznam doseženih točk.
@@ -68,3 +69,58 @@ def ahp(matrix):
         print("Pozor: Konsistenca ni ustrezna! Razmislite o ponovni oceni parnih primerjav.")
     
     return weights, consistency_ratio, consistency_message
+
+
+def promethee(matrix, weights, is_benefit, p=0.5, q=0.1):
+    import logging
+    logging.basicConfig(level=logging.DEBUG)
+    
+    n_alternatives, n_criteria = matrix.shape
+
+    if isinstance(weights, np.ndarray):
+        weights = weights.item()  # Pretvori numpy.ndarray v slovar    
+    criteria = list(weights.keys())
+
+    max_values = matrix.max(axis=0)
+    logging.debug(f"Max values for each column: {max_values}")
+  
+    # Normalizacija matrike
+    normalized_matrix = np.divide(matrix,matrix.max(axis=0, keepdims=True),where=(matrix.max(axis=0, keepdims=True) != 0))
+    #normalized_matrix = matrix / matrix.max(axis=0)
+
+    preference_matrix = np.zeros((n_alternatives, n_alternatives))
+
+    # Izračun preferenčne matrike
+    for i in range(n_alternatives):
+        for j in range(n_alternatives):
+            if i != j:
+                for k in range(n_criteria):
+                    diff = normalized_matrix[i, k] - normalized_matrix[j, k]
+                    # Preverimo, če je kriterij "benefit" ali "cost"
+                    key = criteria[k]
+
+                    is_benefit_value = is_benefit.get(key, True)
+                    if not is_benefit_value:  # Obrni razliko za "cost" kriterij
+                        diff = -diff
+                #    logging.debug(f"Key: {key}, Weight: {weights.get(key)}, Preference Function: {preference_function(diff, p, q)}")
+                #    logging.debug(f"Key: {key}, Diff: {diff}, P: {p}, Q: {q}")
+                #    logging.debug(f"Normalized Matrix for Key {key}: {normalized_matrix[:, k]}")
+                    preference_matrix[i, j] += weights[key] * preference_function(diff, p, q)
+
+    # Izračun pretokov
+    phi_plus = preference_matrix.sum(axis=1) / (n_alternatives - 1)
+    phi_minus = preference_matrix.sum(axis=0) / (n_alternatives - 1)
+    #phi_plus = 1
+    #phi_minus = 0.5
+    phi = phi_plus - phi_minus
+
+    logging.debug(f"Matrix: {matrix}")
+    logging.debug(f"Weights: {weights}")
+    logging.debug(f"is_benefit: {is_benefit}")
+    logging.debug(f"Preference Matrix: {preference_matrix}")
+    logging.debug(f"Normalized Matrix: {normalized_matrix}")
+    logging.debug(f"Diff (i={i}, j={j}, k={k}): {diff}")
+    logging.debug(f"Preference Value (i={i}, j={j}, k={k}): {preference_function(diff, p, q)}")
+    logging.debug(f"Phi Plus: {phi_plus}")
+    logging.debug(f"Phi Minus: {phi_minus}")
+    return phi_plus, phi_minus, phi
