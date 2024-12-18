@@ -7,21 +7,23 @@ import WeightSelector from './components/WeightSelector';  // Uvozi komponento
 import CriteriaSelector from './components/CriteriaSelector';
 import PairwiseComparison from './components/PairwiseComparison';
 import ComparisonChart from './components/ComparisonChart';
-
+import "./style/style.css";
 const App = () => {
   const [selectedCompanies, setSelectedCompanies] = useState([]);
   const [selectedMethod, setSelectedMethod] = useState('WSM');
   const [companies, setCompanies] = useState([]);
   const [weights, setWeights] = useState({
     revenue: 0,
-    profit: 0,
-    revenueGrowth: 0,
+  //  profit: 0,
+   // TODO!!!revenueGrowth: 0,
     employees: 0,
   });
   const [selectedCriteria, setSelectedCriteria] = useState([]);
   const [wsmResults, setWsmResults] = useState([]);  // stanje za WSM rezultate
   const [ahpResults, setAHPResults] = useState([]);  // stanje za AHP rezultate
   const [prometheeResults, setPrometheeResults] = useState([]); // stanje za PROMETHEE rezultate
+  const [arasResults, setArasResults] = useState([]);  // stanje za WSM rezultate
+
   const [userInputs, setUserInputs] = useState({});
   const [analysisReport, setAnalysisReport] = useState([]); // analiza vseh metod
   const analysisReportDemo = [
@@ -127,15 +129,32 @@ const App = () => {
       }
     }
 
+    const getRelevantWeights = () => {
+      return selectedCriteria.reduce((filteredWeights, criterion) => {
+        filteredWeights[criterion] = weights[criterion] || 0;
+        return filteredWeights;
+      }, {});
+    };
+
+    const getRelevantIsBenefit = () => {
+      const defaultIsBenefit = {
+        revenue: true,
+        profit: true,
+        revenueGrowth: true,
+        employees: false,
+      };
+    
+      return selectedCriteria.reduce((filteredIsBenefit, criterion) => {
+        filteredIsBenefit[criterion] = defaultIsBenefit[criterion] || true; // Default to `true` if not explicitly defined
+        return filteredIsBenefit;
+      }, {});
+    };
+
+    console.log(getRelevantIsBenefit);
     let payload = {
       companies: selectedCompanies,
-      weights: weights,
-      is_benefit: {
-        revenue: true,  // Primer: prihodki so benefit (več je bolje)
-        profit: true,   // Dobiček je benefit
-        revenueGrowth: true,
-        employees: false  // Število zaposlenih bi lahko bil cost kriterij (manjše je bolje)
-      },
+      weights: getRelevantWeights(),
+      is_benefit: getRelevantIsBenefit(),
       criteriaMatrix: generateMatrix(selectedCriteria,selectedCompanies)
     };
 
@@ -162,13 +181,16 @@ const App = () => {
       case 'PROMETHEE':
         apiUrl = 'http://localhost:8000/api/mcda/promethee';
         break;
+      case 'ARAS':
+          apiUrl = 'http://localhost:8000/api/mcda/aras';
+      break;
       default:
         alert("Please select a valid MCDA method.");
         return;
     }
   
     const totalWeight = Object.values(weights).reduce((a, b) => a + b, 0);
-
+    console.log("TOTAL ", totalWeight);
     if (selectedMethod !== "AHP" && totalWeight !== 100) {
       alert('Total weights must equal 100%.');
     } else {
@@ -220,6 +242,9 @@ const App = () => {
       else if (selectedMethod === 'PROMETHEE') {
         setPrometheeResults(data);
       }
+      else if (selectedMethod === 'ARAS') {
+        setArasResults(data);
+      }
       else {
         setWsmResults(data);  // Nastavi rezultate za WSM in TOPSIS metode
       }
@@ -230,7 +255,8 @@ const App = () => {
 
   return (
     <div className="container my-5">
-      <h1 className="text-center mb-4">Investment Decision Support System - MDSAs</h1>
+    
+      <h1 className="text-center mb-4">Investment Decision Support System - MCDA</h1>
           <CompanySelector
             selectedCompanies={selectedCompanies}
             setSelectedCompanies={setSelectedCompanies}
@@ -287,6 +313,18 @@ const App = () => {
             <h2>{selectedMethod} Results</h2>
             <ul className="list-group">
               {wsmResults.map((result, index) => (
+                <li key={index} className="list-group-item">
+                  <strong>{result.name}</strong>: {result.score.toFixed(2)}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {(selectedMethod === 'ARAS') && arasResults.length > 0 && (
+          <div>
+            <h2>{selectedMethod} Results</h2>
+            <ul className="list-group">
+              {arasResults.map((result, index) => (
                 <li key={index} className="list-group-item">
                   <strong>{result.name}</strong>: {result.score.toFixed(2)}
                 </li>

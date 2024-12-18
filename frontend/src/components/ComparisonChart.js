@@ -36,6 +36,11 @@ const ComparisonChart = ({ data }) => {
       data: data.map(item => item.PROMETHEE),
       backgroundColor: 'rgba(54, 162, 235, 0.6)',
     },
+    {
+      label: 'ARAS',
+      data: data.map(item => item.PROMETHEE),
+      backgroundColor: 'rgba(122, 123, 22, 0.6)',
+    },
   ];
 
   const chartData = {

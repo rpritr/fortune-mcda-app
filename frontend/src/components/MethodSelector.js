@@ -1,7 +1,7 @@
 // src/components/MethodSelector.js
 import React from 'react';
 
-const methods = ['AHP', 'TOPSIS', 'PROMETHEE', 'WSM'];
+const methods = ['AHP', 'TOPSIS', 'PROMETHEE', 'WSM', 'ARAS'];
 
 const MethodSelector = ({ selectedMethod, setSelectedMethod }) => {
   return (
