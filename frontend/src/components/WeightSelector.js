@@ -28,6 +28,11 @@ const WeightSelector = ({ selectedCriteria, weights, setWeights }) => {
 
   return (
     <div>
+    <div className="card mb-4">
+          <div className="card-header">
+            <h2>Set Weights for Selected Criteria</h2>
+          </div>
+          <div className="card-body">
       <h2>Set Weights for Selected Criteria</h2>
       {selectedCriteria.map((criteria) => (
         <div key={criteria}>
@@ -42,6 +47,8 @@ const WeightSelector = ({ selectedCriteria, weights, setWeights }) => {
           />
         </div>
       ))}
+    </div>
+    </div>
     </div>
   );
 };

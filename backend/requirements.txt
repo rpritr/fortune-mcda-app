@@ -1,0 +1,14 @@
+Flask
+pymongo
+flask-cors
+requests
+beautifulsoup4
+numpy
+debugpy
+werkzeug
+markupsafe
+click
+blinker
+jinja2
+itsdangerous
+importlib_metadata
