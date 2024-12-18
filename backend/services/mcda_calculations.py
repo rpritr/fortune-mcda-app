@@ -112,7 +112,7 @@ def promethee(matrix, weights, is_benefit, p=0.5, q=0.1):
     phi_minus = preference_matrix.sum(axis=0) / (n_alternatives - 1)
     #phi_plus = 1
     #phi_minus = 0.5
-    phi = phi_plus - phi_minus
+    score = phi_plus - phi_minus
 
     logging.debug(f"Matrix: {matrix}")
     logging.debug(f"Weights: {weights}")
@@ -123,4 +123,32 @@ def promethee(matrix, weights, is_benefit, p=0.5, q=0.1):
     logging.debug(f"Preference Value (i={i}, j={j}, k={k}): {preference_function(diff, p, q)}")
     logging.debug(f"Phi Plus: {phi_plus}")
     logging.debug(f"Phi Minus: {phi_minus}")
-    return phi_plus, phi_minus, phi
+    return phi_plus, phi_minus, score
+
+
+def aras(matrix, weights, is_benefit):
+    """
+    ARAS Method Implementation
+    """
+    n_alternatives, n_criteria = matrix.shape
+    
+    # Step 1: Normalize the decision matrix
+    normalized_matrix = np.zeros((n_alternatives, n_criteria))
+    for j in range(n_criteria):
+        if is_benefit[j]:
+            normalized_matrix[:, j] = matrix[:, j] / np.max(matrix[:, j])
+        else:
+            normalized_matrix[:, j] = np.min(matrix[:, j]) / matrix[:, j]
+    
+    # Step 2: Calculate the weighted normalized scores
+    weighted_matrix = normalized_matrix * weights
+
+    # Step 3: Compute total scores for each alternative
+    scores = np.sum(weighted_matrix, axis=1)
+
+    # Step 4: Calculate relative scores
+    best_score = np.max(scores)
+    relative_scores = scores / best_score
+
+    # Return results
+    return relative_scores, scores

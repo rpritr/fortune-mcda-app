@@ -11,6 +11,17 @@ const CompanySelector = ({ selectedCompanies, setSelectedCompanies, companies })
     }
   };
 
+const handleSelectAll = (e) => {
+  if (e.target.checked) {
+    // Če je Select All obkljukan, dodamo vsa podjetja
+    setSelectedCompanies(companies);
+  } else {
+    // Če je Select All odkljukan, izpraznimo seznam
+    setSelectedCompanies([]);
+  }
+
+}
+
   return (
     <div>
       <div className="card mb-4">
@@ -19,7 +30,10 @@ const CompanySelector = ({ selectedCompanies, setSelectedCompanies, companies })
           </div>
           <div className="card-body">
         <h2>Select Companies</h2>
-        {companies.map((company, index) => (
+        <div key="all" className="column">
+                <input type="checkbox" name="all" value="all" onClick={handleSelectAll}/>All
+            </div>        
+            {companies.map((company, index) => (
           <div key={index}>
             <input
               type="checkbox"

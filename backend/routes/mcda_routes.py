@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from models.db_config import db
-from services.mcda_calculations import wsm, topsis, ahp, promethee
+from services.mcda_calculations import wsm, topsis, ahp, promethee, aras
 import numpy as np
 
 mcda_routes = Blueprint('mcda_routes', __name__)
@@ -76,20 +76,41 @@ def promethee_api():
         p = data.get('p', 0.5)
         q = data.get('q', 0.1)
 
-        phi_plus, phi_minus, phi = promethee(matrix, weights, is_benefit, p, q)
+        phi_plus, phi_minus, score = promethee(matrix, weights, is_benefit, p, q)
 
        # Pripravimo odziv z rezultati
-        response_data = {
-            "results": [
+        response_data =  [
                 {
                     "name": data["companies"][i]["name"],  # Podjetje iz vhodnih podatkov
                     "phi_plus": phi_plus[i],
                     "phi_minus": phi_minus[i],
-                    "phi": phi[i]
+                    "score": score[i]
                 }
-                for i in range(len(phi))
+                for i in range(len(score))
             ]
-        }
+        return jsonify(response_data), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+@mcda_routes.route('/aras', methods=['POST'])
+def aras_api():
+    try:
+        data = request.json
+        matrix = np.array(data['criteriaMatrix'])
+        weights = np.array(list(data['weights'].values()))
+        is_benefit = [data['is_benefit'][key] for key in data['weights'].keys()]
+        
+        relative_scores, scores = aras(matrix, weights, is_benefit)
+
+        response_data = [
+            {
+                "name": data["companies"][i]["name"],
+                "score": scores[i],
+                "relative_score": relative_scores[i]
+            }
+            for i in range(len(scores))
+        ]
+        
         return jsonify(response_data), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500

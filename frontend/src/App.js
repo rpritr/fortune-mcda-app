@@ -6,23 +6,32 @@ import MethodSelector from './components/MethodSelector';
 import WeightSelector from './components/WeightSelector';  // Uvozi komponento
 import CriteriaSelector from './components/CriteriaSelector';
 import PairwiseComparison from './components/PairwiseComparison';
-
+import ComparisonChart from './components/ComparisonChart';
+import "./style/style.css";
 const App = () => {
   const [selectedCompanies, setSelectedCompanies] = useState([]);
   const [selectedMethod, setSelectedMethod] = useState('WSM');
   const [companies, setCompanies] = useState([]);
   const [weights, setWeights] = useState({
     revenue: 0,
-    profit: 0,
-    revenueGrowth: 0,
+  //  profit: 0,
+   // TODO!!!revenueGrowth: 0,
     employees: 0,
   });
   const [selectedCriteria, setSelectedCriteria] = useState([]);
   const [wsmResults, setWsmResults] = useState([]);  // stanje za WSM rezultate
   const [ahpResults, setAHPResults] = useState([]);  // stanje za AHP rezultate
   const [prometheeResults, setPrometheeResults] = useState([]); // stanje za PROMETHEE rezultate
-  const [userInputs, setUserInputs] = useState({});
+  const [arasResults, setArasResults] = useState([]);  // stanje za WSM rezultate
 
+  const [userInputs, setUserInputs] = useState({});
+  const [analysisReport, setAnalysisReport] = useState([]); // analiza vseh metod
+  const analysisReportDemo = [
+    { company: 'Walmart', WSM: 60, TOPSIS: 55, AHP: 70, PROMETHEE: 65 },
+    { company: 'Amazon', WSM: 58, TOPSIS: 60, AHP: 68, PROMETHEE: 66 },
+    { company: 'State Grid', WSM: 59, TOPSIS: 58, AHP: 65, PROMETHEE: 64 },
+  ];
+  
   const [error, setError] = useState(null);
   const [isBenefit, setIsBenefit] = useState({});  // Initialize isBenefit as an object
   const [companyScores, setCompanyScores] = useState([]); // Dodano stanje za rezultate podjetij
@@ -120,15 +129,32 @@ const App = () => {
       }
     }
 
+    const getRelevantWeights = () => {
+      return selectedCriteria.reduce((filteredWeights, criterion) => {
+        filteredWeights[criterion] = weights[criterion] || 0;
+        return filteredWeights;
+      }, {});
+    };
+
+    const getRelevantIsBenefit = () => {
+      const defaultIsBenefit = {
+        revenue: true,
+        profit: true,
+        revenueGrowth: true,
+        employees: false,
+      };
+    
+      return selectedCriteria.reduce((filteredIsBenefit, criterion) => {
+        filteredIsBenefit[criterion] = defaultIsBenefit[criterion] || true; // Default to `true` if not explicitly defined
+        return filteredIsBenefit;
+      }, {});
+    };
+
+    console.log(getRelevantIsBenefit);
     let payload = {
       companies: selectedCompanies,
-      weights: weights,
-      is_benefit: {
-        revenue: true,  // Primer: prihodki so benefit (več je bolje)
-        profit: true,   // Dobiček je benefit
-        revenueGrowth: true,
-        employees: false  // Število zaposlenih bi lahko bil cost kriterij (manjše je bolje)
-      },
+      weights: getRelevantWeights(),
+      is_benefit: getRelevantIsBenefit(),
       criteriaMatrix: generateMatrix(selectedCriteria,selectedCompanies)
     };
 
@@ -155,13 +181,16 @@ const App = () => {
       case 'PROMETHEE':
         apiUrl = 'http://localhost:8000/api/mcda/promethee';
         break;
+      case 'ARAS':
+          apiUrl = 'http://localhost:8000/api/mcda/aras';
+      break;
       default:
         alert("Please select a valid MCDA method.");
         return;
     }
   
     const totalWeight = Object.values(weights).reduce((a, b) => a + b, 0);
-
+    console.log("TOTAL ", totalWeight);
     if (selectedMethod !== "AHP" && totalWeight !== 100) {
       alert('Total weights must equal 100%.');
     } else {
@@ -188,14 +217,33 @@ const App = () => {
   
       const data = await response.json();
       console.log('Analysis Results:', data);
+      // Dynamically update `analysisReport` with results for the current method
+    const updatedReport = selectedCompanies.map((company, index) => {
+      const existingEntry =
+        analysisReport.find((entry) => entry.company === company.name) || { company: company.name };
+
+      return {
+        ...existingEntry,
+        [selectedMethod]: data[index]?.score || 0, // Add or update the score for the selected method
+      };
+    });
+
+    setAnalysisReport(updatedReport); // Update the analysis report
+    console.log("Updated Analysis Report:", updatedReport);
+      
+      console.log(analysisReport);
 
       if (selectedMethod === 'AHP') {
         setAHPResults(data);  // Nastavi rezultate AHP metode
         console.log(data)
         console.log(wsmResults)
+       
       } 
       else if (selectedMethod === 'PROMETHEE') {
         setPrometheeResults(data);
+      }
+      else if (selectedMethod === 'ARAS') {
+        setArasResults(data);
       }
       else {
         setWsmResults(data);  // Nastavi rezultate za WSM in TOPSIS metode
@@ -207,7 +255,8 @@ const App = () => {
 
   return (
     <div className="container my-5">
-      <h1 className="text-center mb-4">Investment Decision Support System - MDSAs</h1>
+    
+      <h1 className="text-center mb-4">Investment Decision Support System - MCDA</h1>
           <CompanySelector
             selectedCompanies={selectedCompanies}
             setSelectedCompanies={setSelectedCompanies}
@@ -271,6 +320,18 @@ const App = () => {
             </ul>
           </div>
         )}
+        {(selectedMethod === 'ARAS') && arasResults.length > 0 && (
+          <div>
+            <h2>{selectedMethod} Results</h2>
+            <ul className="list-group">
+              {arasResults.map((result, index) => (
+                <li key={index} className="list-group-item">
+                  <strong>{result.name}</strong>: {result.score.toFixed(2)}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         {selectedMethod === 'AHP' && ahpResults.consistency_ratio && (
         <div>
           <h2>AHP Results</h2>
@@ -303,7 +364,7 @@ const App = () => {
     <h2>PROMETHEE Results</h2>
     <ul>
       {prometheeResults.map((result, index) => (
-        <li key={index}>{result.name}: {result.phi.toFixed(2)}</li>
+        <li key={index}>{result.name}: {result.score.toFixed(2)}</li>
       ))}
     </ul>
   </div>
@@ -318,22 +379,27 @@ const App = () => {
           <th>Company</th>
           <th>Phi Plus</th>
           <th>Phi Minus</th>
-          <th>Phi</th>
+          <th>Score</th>
         </tr>
       </thead>
       <tbody>
-        {prometheeResults.results.map((result, index) => (
+        {prometheeResults.map((result, index) => (
           <tr key={index}>
-            <td>{result.name}</td>
-            <td>{result.phi_plus.toFixed(2)}</td>
-            <td>{result.phi_minus.toFixed(2)}</td>
-            <td>{result.phi.toFixed(2)}</td>
+            <td>{name}</td>
+            <td>{phi_plus.toFixed(2)}</td>
+            <td>{phi_minus.toFixed(2)}</td>
+            <td>{score.toFixed(2)}</td>
           </tr>
         ))}
       </tbody>
     </table>
   </div>
 )}
+<div>
+      {/* Drugi deli aplikacije */}
+      <h2>Primerjava rezultatov MCDA metod</h2>
+      <ComparisonChart data={analysisReport} />
+    </div>
     </div>
     
   );
