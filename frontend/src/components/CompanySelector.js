@@ -26,10 +26,10 @@ const handleSelectAll = (e) => {
     <div>
       <div className="card mb-4">
           <div className="card-header">
-            <h2>Select Companies</h2>
+            <h2>Izbira alternativ</h2>
           </div>
           <div className="card-body">
-        <h2>Select Companies</h2>
+        <h2>Izberite podjetja za analizo</h2>
         <div key="all" className="column">
                 <input type="checkbox" name="all" value="all" onClick={handleSelectAll}/>All
             </div>        

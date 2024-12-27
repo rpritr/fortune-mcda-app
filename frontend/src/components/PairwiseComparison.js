@@ -14,7 +14,7 @@ const PairwiseComparison = ({ selectedCriteria, userInputs, setUserInputs }) => 
 
   return (
     <div>
-      <h2>Set Pairwise Comparisons</h2>
+      <h2>Primerjava po parih</h2>
       <div className="pairwise-comparisons">
         {selectedCriteria.map((criteria1, index1) =>
           selectedCriteria.slice(index1 + 1).map((criteria2, index2) => {
@@ -22,7 +22,7 @@ const PairwiseComparison = ({ selectedCriteria, userInputs, setUserInputs }) => 
             return (
               <div key={criteriaPair} className="pairwise-comparison">
                 <label>
-                  {criteria1} vs {criteria2}
+                  {criteria1} proti {criteria2}
                 </label>
                 <input
                   type="number"

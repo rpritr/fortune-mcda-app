@@ -308,7 +308,7 @@ const App = () => {
   return (
     <div className="container my-5">
     
-      <h1 className="text-center mb-4">Investment Decision Support System - MCDA</h1>
+      <h1 className="text-center mb-4">Sistem za podporo odločanju za analizo investicij - MCDA</h1>
           <CompanySelector
             selectedCompanies={selectedCompanies}
             setSelectedCompanies={setSelectedCompanies}
@@ -316,7 +316,7 @@ const App = () => {
           />
           <div className="card mb-4">
         <div className="card-header">
-          <h2>Select MCDA Method</h2>
+          <h2>Izbira metode</h2>
         </div>
         <div className="card-body">
           <MethodSelector
@@ -354,7 +354,7 @@ const App = () => {
      {/* Gumb za pošiljanje */}
      <div className="text-center">
         <button className="btn btn-primary btn-lg" onClick={handleSubmit}>
-          Run
+          Izvedi analizo
         </button>
       </div>
       <div className="results mt-5">
@@ -362,7 +362,7 @@ const App = () => {
         {error && <p className="text-danger">{error}</p>}
         {(selectedMethod === 'WSM' || selectedMethod === 'TOPSIS') && wsmResults.length > 0 && (
           <div>
-            <h2>{selectedMethod} Results</h2>
+            <h2>{selectedMethod} Rezultati</h2>
             <ul className="list-group">
               {wsmResults.map((result, index) => (
                 <li key={index} className="list-group-item">
@@ -374,7 +374,7 @@ const App = () => {
         )}
         {(selectedMethod === 'ARAS') && arasResults.length > 0 && (
           <div>
-            <h2>{selectedMethod} Results</h2>
+            <h2>{selectedMethod} Rezultati</h2>
             <ul className="list-group">
               {arasResults.map((result, index) => (
                 <li key={index} className="list-group-item">
@@ -386,12 +386,12 @@ const App = () => {
         )}
         {selectedMethod === 'AHP' && ahpResults.consistency_ratio && (
         <div>
-          <h2>AHP Results</h2>
-          <p>Consistency Ratio: {ahpResults.consistency_ratio}</p>
+          <h2>AHP rezultati</h2>
+          <p>CR: {ahpResults.consistency_ratio}</p>
           <ul className="list-group">
             {ahpResults.weights.map((weight, index) => (
               <li key={index} className="list-group-item">
-                Criterion {index + 1}: {weight.toFixed(2)}
+                Kriterij {index + 1}: {weight.toFixed(2)}
               </li>
             ))}
           </ul>
@@ -413,7 +413,7 @@ const App = () => {
       </div>
       {selectedMethod === 'PROMETHEE' && prometheeResults.length > 0 && (
   <div>
-    <h2>PROMETHEE Results</h2>
+    <h2>PROMETHEE rezultati</h2>
     <ul>
       {prometheeResults.map((result, index) => (
         <li key={index}>{result.name}: {result.score.toFixed(2)}</li>
@@ -424,14 +424,14 @@ const App = () => {
 
 {selectedMethod === 'PROMETHEE' && prometheeResults.results && (
   <div>
-    <h2>PROMETHEE Results</h2>
+    <h2>PROMETHEE rezultati</h2>
     <table className="table">
       <thead>
         <tr>
-          <th>Company</th>
+          <th>Podjetje</th>
           <th>Phi Plus</th>
           <th>Phi Minus</th>
-          <th>Score</th>
+          <th>Rezutltat</th>
         </tr>
       </thead>
       <tbody>
@@ -447,7 +447,7 @@ const App = () => {
     </table>
   </div>
 )}
-<div>
+<div className="chart mt-5">
       {/* Drugi deli aplikacije */}
       <h2>Primerjava rezultatov MCDA metod</h2>
       <ComparisonChart data={analysisReport} />
