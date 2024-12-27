@@ -29,3 +29,4 @@ def add_company():
     data = request.json
     companies_collection.insert_one(data)
     return jsonify({"message": "Company added successfully"}), 201
+
