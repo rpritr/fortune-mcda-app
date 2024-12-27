@@ -9,8 +9,12 @@ import os
 app = Flask(__name__)
 
 # cors podpora zaradi GET zahtevkov
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
-
+#CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
+CORS(app, resources={
+    r"/api/*": {
+        "origins": ["http://localhost:3000", "http://20.218.128.230:3000"]
+    }
+})
 # endpoint za pridobivanje podatkov
 app.register_blueprint(company_routes, url_prefix='/api/companies')
 
