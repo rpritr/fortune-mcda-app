@@ -6,7 +6,7 @@ const methods = ['AHP', 'TOPSIS', 'PROMETHEE', 'WSM', 'ARAS'];
 const MethodSelector = ({ selectedMethod, setSelectedMethod }) => {
   return (
     <div>
-      <h2>Select MCDA Method</h2>
+      <h2>Izberite MCDA metodo</h2>
       <select value={selectedMethod} onChange={(e) => setSelectedMethod(e.target.value)}>
         {methods.map((method, index) => (
           <option key={index} value={method}>

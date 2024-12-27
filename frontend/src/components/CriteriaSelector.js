@@ -2,14 +2,14 @@ import React from 'react';
 
 const CriteriaSelector = ({ selectedCriteria, setSelectedCriteria, isBenefit, setIsBenefit }) => {
   const criteriaList = [
-    { key: 'assets', label: 'Assets' },
-    { key: 'employees', label: 'Employees' },
-    { key: 'profit', label: 'Profit' },
-    { key: 'profit_change', label: 'Profit Change' },
-    { key: 'rank', label: 'Rank' },
-    { key: 'revenue', label: 'Revenue' },
-    { key: 'revenue_change', label: 'Revenue Change' },
-    { key: 'years_in_rank', label: 'Years in rank' },
+    { key: 'assets', label: 'Sredstva' },
+    { key: 'employees', label: 'Zaposleni' },
+    { key: 'profit', label: 'Dobiček' },
+    { key: 'profit_change', label: 'Sprememba dobička' },
+    { key: 'rank', label: 'Rang' },
+    { key: 'revenue', label: 'Prihodki' },
+    { key: 'revenue_change', label: 'Sprememba prihodkov' },
+    { key: 'years_in_rank', label: 'Let v rangu' },
 
   ];
 
@@ -32,10 +32,10 @@ const CriteriaSelector = ({ selectedCriteria, setSelectedCriteria, isBenefit, se
     <div>
      <div className="card mb-4">
         <div className="card-header">
-          <h2>Select Criteria for Analysis</h2>
+          <h2>Izbira kriterijev</h2>
         </div>
         <div className="card-body">
-      <h2>Select Criteria for Analysis</h2>
+      <h2>Izberite kriterije za analizo</h2>
       {criteriaList.map((criteria) => (
         <div key={criteria.key}>
           <input
@@ -55,7 +55,7 @@ const CriteriaSelector = ({ selectedCriteria, setSelectedCriteria, isBenefit, se
                     onChange={(e) => handleIsBenefitChange(e, criteria.key)}
                   />
                   <label className="form-check-label" htmlFor={`${criteria.key}-isBenefit`}>
-                    Is Benefit?
+                    Benefit?
                   </label>
                 </div>
               )}

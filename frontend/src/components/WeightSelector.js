@@ -30,10 +30,10 @@ const WeightSelector = ({ selectedCriteria, weights, setWeights }) => {
     <div>
     <div className="card mb-4">
           <div className="card-header">
-            <h2>Set Weights for Selected Criteria</h2>
+            <h2>Določanje uteži</h2>
           </div>
           <div className="card-body">
-      <h2>Set Weights for Selected Criteria</h2>
+      <h2>Določite uteži za kriterije</h2>
       {selectedCriteria.map((criteria) => (
         <div key={criteria}>
           <label>{criteria} (%): </label>
