@@ -3,9 +3,12 @@ import React from 'react';
 const PairwiseComparison = ({ selectedCriteria, userInputs, setUserInputs }) => {
   const handleInputChange = (e, criteriaPair) => {
     const value = parseFloat(e.target.value);
+    const [criteria1, criteria2] = criteriaPair.split("-");
+  
     setUserInputs((prevInputs) => ({
       ...prevInputs,
-      [criteriaPair]: value
+      [criteriaPair]: value, // Direct input
+      [`${criteria2}-${criteria1}`]: (value !== 0) ? 1 / value : 0 // Inverse value
     }));
   };
 
