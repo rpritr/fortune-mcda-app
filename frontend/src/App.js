@@ -35,12 +35,14 @@ const App = () => {
   const [error, setError] = useState(null);
   const [isBenefit, setIsBenefit] = useState({});  // Initialize isBenefit as an object
   const [companyScores, setCompanyScores] = useState([]); // Dodano stanje za rezultate podjetij
+  const apiHost = process.env.REACT_APP_API_URL;
+  console.log(apiHost);
 
   useEffect(() => {
     // Pridobi podjetja iz našega Flask API-ja
     const fetchCompanies = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/companies');
+        const response = await axios.get(`${apiHost}/api/companies`);
         setCompanies(response.data);
       } catch (error) {
         console.error('Error fetching companies:', error);
@@ -219,20 +221,20 @@ const App = () => {
     // Odvisno od izbrane metode določimo pravi API URL
     switch (selectedMethod) {
       case 'WSM':
-        apiUrl = 'http://localhost:8000/api/mcda/wsm';
+        apiUrl = `${apiHost}/api/mcda/wsm`;
         break;
       case 'TOPSIS':
-        apiUrl = 'http://localhost:8000/api/mcda/topsis';
+        apiUrl = `${apiHost}/api/mcda/topsis`;
         break;
       case 'AHP':
-        apiUrl = 'http://localhost:8000/api/mcda/ahp';
+        apiUrl = `${apiHost}/api/mcda/ahp`;
        // payload.criteriaMatrix = generateEqualMatrix(selectedCriteria);
         break;
       case 'PROMETHEE':
-        apiUrl = 'http://localhost:8000/api/mcda/promethee';
+        apiUrl = `${apiHost}/api/mcda/promethee`;
         break;
       case 'ARAS':
-          apiUrl = 'http://localhost:8000/api/mcda/aras';
+          apiUrl = `${apiHost}/api/mcda/aras`;
       break;
       default:
         alert("Please select a valid MCDA method.");
