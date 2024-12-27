@@ -59,11 +59,12 @@ const App = () => {
     }, [ahpResults, companies, selectedCriteria]);
 
     const cleanValue = (value) => {
+      if (value === undefined || value === null || value === "") return null; // Handle missing input
       if (typeof value === 'string') {
-        // Odstrani ne-numerične znake (npr. '$', ',', '%') in pretvori v število
-        return parseFloat(value.replace(/[^0-9.-]+/g, '')) || 0;
+        const cleaned = parseFloat(value.replace(/[^0-9.-]+/g, ''));
+        return isNaN(cleaned) ? null : cleaned; // Ensure a valid number
       }
-      return parseFloat(value) || 0;
+      return !isNaN(value) ? parseFloat(value) : null; // Fallback for numeric types
     };
     const generateMatrix = (selectedCriteria, selectedCompanies) => {
       const matrix = selectedCompanies.map((company) => {
@@ -73,6 +74,16 @@ const App = () => {
         });
       });
       return matrix;
+    };
+    const generateAHPMMatrix = (selectedCriteria, userInputs) => {
+      const size = selectedCriteria.length;
+      return Array.from({ length: size }, (_, i) =>
+        Array.from({ length: size }, (_, j) => {
+          if (i === j) return 1; // Diagonal is always 1
+          if (i < j) return userInputs[`${selectedCriteria[i]}-${selectedCriteria[j]}`] || 1;
+          return 1 / (userInputs[`${selectedCriteria[j]}-${selectedCriteria[i]}`] || 1);
+        })
+      );
     };
     const generateMatrixOld = (selectedCriteria, selectedCompanies) => {
       const matrix = selectedCompanies.map((company) => {
@@ -95,15 +106,47 @@ const App = () => {
     return matrix;
   };
 
+  const transformUserInputs = (userInputs) => {
+    const transformed = {};
+    for (let i = 0; i < userInputs.length; i++) {
+      for (let j = i + 1; j < userInputs.length; j++) {
+        const key = `${Object.keys(userInputs[i])[0]}-${Object.keys(userInputs[j])[0]}`;
+        transformed[key] = cleanValue(userInputs[i][Object.keys(userInputs[i])[0]]);
+      }
+    }
+    return transformed;
+  };
+
   const generateUserDefinedMatrix = (criteria, userInputs) => {
     const size = criteria.length;
+  
+    console.log("Selected Criteria:", criteria);
+    console.log("User Inputs:", userInputs);
+  
     const matrix = Array.from({ length: size }, (_, i) =>
       Array.from({ length: size }, (_, j) => {
-        if (i === j) return 1; // Diagonalna vrednost je vedno 1
-        if (i < j) return userInputs[`${criteria[i]}-${criteria[j]}`] || 1;
-        return 1 / (userInputs[`${criteria[j]}-${criteria[i]}`] || 1); // Inverz
+        if (i === j) return 1; // Diagonal is always 1
+  
+        const pairwiseKey = `${criteria[i]}-${criteria[j]}`;
+        const inversePairwiseKey = `${criteria[j]}-${criteria[i]}`;
+  
+        const value = cleanValue(userInputs[pairwiseKey]);
+        const inverseValue = cleanValue(userInputs[inversePairwiseKey]);
+  
+        if (value !== null) {
+          console.log(`Matrix[${i}][${j}] = ${pairwiseKey}:`, value);
+          return value;
+        } else if (inverseValue !== null) {
+          console.log(`Matrix[${i}][${j}] = Inverse ${inversePairwiseKey}:`, 1 / inverseValue);
+          return 1 / inverseValue;
+        }
+  
+        console.warn(`No user input for ${pairwiseKey} or ${inversePairwiseKey}, defaulting to 1`);
+        return 1; // Default fallback
       })
     );
+  
+    console.log("Generated Pairwise Matrix:", matrix);
     return matrix;
   };
 
@@ -151,13 +194,20 @@ const App = () => {
     };
 
     console.log(getRelevantIsBenefit);
+    let criteriaMat = [];
+    if(selectedMethod != "AHP") {
+      criteriaMat = generateMatrix(selectedCriteria,selectedCompanies)
+
+    } else {
+      criteriaMat=  generateUserDefinedMatrix(selectedCriteria,userInputs)
+    }
     let payload = {
       companies: selectedCompanies,
       weights: getRelevantWeights(),
       is_benefit: getRelevantIsBenefit(),
-      criteriaMatrix: generateMatrix(selectedCriteria,selectedCompanies)
+      criteriaMatrix: criteriaMat
     };
-
+    console.log(payload);
     console.log('Selected Companies:', selectedCompanies);
     console.log('Selected Method:', selectedMethod);
     console.log('Selected Criteria:', selectedCriteria);
