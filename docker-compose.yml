@@ -6,7 +6,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "8000:5000"  # Zunanji port : port v kontejnerju
+      - "8000:5000"  # External : port in container
       - "5679:5679"  # Debugging port
     networks:
       - app-network
@@ -24,7 +24,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "3000:80"  # React aplikacija bo dosegljiva na portu 3000
+      - "3000:80"  # React port 3000
     networks:
       - app-network
     depends_on:
@@ -33,7 +33,7 @@ services:
   mongo:
     image: mongo:4.4
     ports:
-      - "27017:27017"  # MongoDB bo dosegljiv na portu 27017
+      - "27017:27017"  # MongoDB port 27017
     networks:
       - app-network
     volumes:

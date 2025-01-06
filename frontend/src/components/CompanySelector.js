@@ -3,20 +3,20 @@ import React from 'react';
 const CompanySelector = ({ selectedCompanies, setSelectedCompanies, companies }) => {
   const handleCheckboxChange = (e, company) => {
     if (selectedCompanies.find((selected) => selected.name === company.name)) {
-      // Če je podjetje že izbrano, ga odstranimo
+      // if found company update
       setSelectedCompanies(selectedCompanies.filter((item) => item.name !== company.name));
     } else {
-      // Če podjetje še ni izbrano, ga dodamo
+      //if not add it
       setSelectedCompanies([...selectedCompanies, company]);
     }
   };
 
 const handleSelectAll = (e) => {
   if (e.target.checked) {
-    // Če je Select All obkljukan, dodamo vsa podjetja
+    // if all selected set
     setSelectedCompanies(companies);
   } else {
-    // Če je Select All odkljukan, izpraznimo seznam
+    // if deselected unset
     setSelectedCompanies([]);
   }
 

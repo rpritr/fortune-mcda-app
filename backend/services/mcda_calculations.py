@@ -1,9 +1,9 @@
 import numpy as np
 from utils.helpers import clean_value
-from services.helpers import preference_function
+from services.helpers import preference_function, normalize_matrix, calculate_weights, calculate_consistency_ratio
 
-#  Algoritem očisti vrednosti in jih pomnoži z utežmi
-# Rezultat je urejen seznam doseženih točk.
+# The algorithm cleans the values ​​and multiplies them by the weights
+# The result is an ordered list of points scored.
 def wsm(companies, weights):
     normalized_weights = {key: weight / 100 for key, weight in weights.items()}
     results = []
@@ -15,62 +15,38 @@ def wsm(companies, weights):
         results.append({'name': company['name'], 'score': score})
     return sorted(results, key=lambda x: x['score'], reverse=True)
 
+# TOPSIS calculation, returns result of calculation
 def topsis(matrix, weights, is_benefit):
-    # Prvi korak je normalizacija matrike, 
+    # The first step is to normalize the matrix,
     normalized_matrix = matrix / np.sqrt((matrix ** 2).sum(axis=0))
     weighted_matrix = normalized_matrix * weights
 
-    # Določimo pozitivni in negativni vektor.
+    # Define positive and negative vectors.
     positive_ideal = np.max(weighted_matrix, axis=0) if is_benefit else np.min(weighted_matrix, axis=0)
+    
     negative_ideal = np.min(weighted_matrix, axis=0) if is_benefit else np.max(weighted_matrix, axis=0)
-    # Algoritem izračuna razdalje do obeh vektorjev 
-    # Določimo relativno bližino pozitivnemu idealu.
+    # The algorithm calculates the distances to both vectors
+    # We determine the relative proximity to the positive ideal
     positive_distance = np.sqrt(((weighted_matrix - positive_ideal) ** 2).sum(axis=1))
     negative_distance = np.sqrt(((weighted_matrix - negative_ideal) ** 2).sum(axis=1))
     return negative_distance / (positive_distance + negative_distance)
 
-def normalize_matrix(matrix):
-    """Normalizira matriko parnih primerjav."""
-    column_sums = matrix.sum(axis=0)
-    normalized_matrix = matrix / column_sums
-    print("Originalna matrika:", matrix)
-    print("Vsote stolpcev:", column_sums)
-    print("Normalizirana matrika:", normalized_matrix)
-    return normalized_matrix
-
-def calculate_weights(normalized_matrix):
-    """Izračuna povprečne vrednosti vrstic, ki predstavljajo uteži kriterijev."""
-    return normalized_matrix.mean(axis=1)
-
-def calculate_consistency_ratio(matrix, weights):
-    """Izračuna indeks konsistence in konsistenčno razmerje."""
-    n = matrix.shape[0]
-    lambda_max = (np.dot(matrix, weights) / weights).mean()
-    consistency_index = (lambda_max - n) / (n - 1)
-
-    # Naključni indeksi za različne velikosti matrik (1-10)
-    random_index_dict = {1: 0.0, 2: 0.0, 3: 0.58, 4: 0.9, 5: 1.12, 6: 1.24, 7: 1.32, 8: 1.41, 9: 1.45, 10: 1.49}
-    random_index = random_index_dict.get(n, 1.49)  # privzeta vrednost za velike matrike
-
-    consistency_ratio = consistency_index / random_index
-    return consistency_ratio
-
 def ahp(matrix):
-    """Izvede AHP analizo na podlagi matrike parnih primerjav."""
+    # Performs AHP analysis based on a pairwise comparison matrix
     normalized_matrix = normalize_matrix(matrix)
     weights = calculate_weights(normalized_matrix)
     consistency_ratio = calculate_consistency_ratio(matrix, weights)
     consistency_message = 'test'
 
-
     if consistency_ratio < 0.1:
         print("Konsistenca je ustrezna.")
     else:
-        print("Pozor: Konsistenca ni ustrezna! Razmislite o ponovni oceni parnih primerjav.")
+        print("Konsistenca ni ustrezna.")
     
     return weights, consistency_ratio, consistency_message
 
-
+# Promethee implementation for calculations
+# TODO remove logging
 def promethee(matrix, weights, is_benefit, p=0.5, q=0.1):
     import logging
     logging.basicConfig(level=logging.DEBUG)
@@ -78,36 +54,36 @@ def promethee(matrix, weights, is_benefit, p=0.5, q=0.1):
     n_alternatives, n_criteria = matrix.shape
 
     if isinstance(weights, np.ndarray):
-        weights = weights.item()  # Pretvori numpy.ndarray v slovar    
+        weights = weights.item()  # convert numpy.ndarray to dict    
     criteria = list(weights.keys())
 
     max_values = matrix.max(axis=0)
     logging.debug(f"Max values for each column: {max_values}")
   
-    # Normalizacija matrike
+    # Normalization
     normalized_matrix = np.divide(matrix,matrix.max(axis=0, keepdims=True),where=(matrix.max(axis=0, keepdims=True) != 0))
     #normalized_matrix = matrix / matrix.max(axis=0)
 
     preference_matrix = np.zeros((n_alternatives, n_alternatives))
 
-    # Izračun preferenčne matrike
+    # Calulcate preference matrix
     for i in range(n_alternatives):
         for j in range(n_alternatives):
             if i != j:
                 for k in range(n_criteria):
                     diff = normalized_matrix[i, k] - normalized_matrix[j, k]
-                    # Preverimo, če je kriterij "benefit" ali "cost"
+                    # check  "benefit" or "cost"
                     key = criteria[k]
 
                     is_benefit_value = is_benefit.get(key, True)
-                    if not is_benefit_value:  # Obrni razliko za "cost" kriterij
+                    if not is_benefit_value:  # invert valuje for benefit/cost
                         diff = -diff
                 #    logging.debug(f"Key: {key}, Weight: {weights.get(key)}, Preference Function: {preference_function(diff, p, q)}")
                 #    logging.debug(f"Key: {key}, Diff: {diff}, P: {p}, Q: {q}")
                 #    logging.debug(f"Normalized Matrix for Key {key}: {normalized_matrix[:, k]}")
                     preference_matrix[i, j] += weights[key] * preference_function(diff, p, q)
 
-    # Izračun pretokov
+    # calculate flow
     phi_plus = preference_matrix.sum(axis=1) / (n_alternatives - 1)
     phi_minus = preference_matrix.sum(axis=0) / (n_alternatives - 1)
     #phi_plus = 1
@@ -126,13 +102,12 @@ def promethee(matrix, weights, is_benefit, p=0.5, q=0.1):
     return phi_plus, phi_minus, score
 
 
+# ARAS implementation
 def aras(matrix, weights, is_benefit):
-    """
-    ARAS Method Implementation
-    """
+
     n_alternatives, n_criteria = matrix.shape
     
-    # Step 1: Normalize the decision matrix
+    # Normalization
     normalized_matrix = np.zeros((n_alternatives, n_criteria))
     for j in range(n_criteria):
         if is_benefit[j]:
@@ -140,15 +115,14 @@ def aras(matrix, weights, is_benefit):
         else:
             normalized_matrix[:, j] = np.min(matrix[:, j]) / matrix[:, j]
     
-    # Step 2: Calculate the weighted normalized scores
+    # Calulate wegights
     weighted_matrix = normalized_matrix * weights
 
-    # Step 3: Compute total scores for each alternative
+    # Calculate SUM
     scores = np.sum(weighted_matrix, axis=1)
 
-    # Step 4: Calculate relative scores
+    # Calculate relative
     best_score = np.max(scores)
     relative_scores = scores / best_score
-
-    # Return results
+    # return scores
     return relative_scores, scores

@@ -24,7 +24,7 @@ const CriteriaSelector = ({ selectedCriteria, setSelectedCriteria, isBenefit, se
   const handleIsBenefitChange = (e, criterion) => {
     setIsBenefit({
       ...isBenefit,
-      [criterion]: e.target.checked,  // Posodobimo vrednost isBenefit za izbrani kriterij
+      [criterion]: e.target.checked,  // update isBenefit for criteria
     });
   };
 

@@ -1,28 +1,28 @@
-# Uporabimo uradno Python sliko
+# Set python image
 FROM python:3.9-slim
 
-# Nastavimo delovno mapo
+# set workdir
 WORKDIR /app
 
-# Kopiramo vse datoteke v kontejner
+# copy all into container
 COPY . /app
 
-# Namestimo vse odvisnosti iz requirements.txt
+# Install all dependencies from requirements.txt
 #RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install --upgrade pip
 RUN pip install --no-deps --no-cache-dir -r requirements.txt
 
-# Dovolimo Flasku, da deluje znotraj Dockerja
+# Let's allow Flask to run inside Docker
 ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
-# Omogoči način za razvijalce (vklopi debug)
+# Enable developer mode (turn on debug)
 ENV FLASK_ENV=development  
 
-# Odprimo port 5000 za Flask aplikacijo
+# Open port 5000 for the Flask application
 EXPOSE 5000
 EXPOSE 5678
 
-# Zagon Flask aplikacije
+# Running Flask Application
 #CMD ["flask", "run", "--debug"]
 
 RUN pip install debugpy

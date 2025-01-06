@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import CompanySelector from './components/CompanySelector';
 import MethodSelector from './components/MethodSelector';
-import WeightSelector from './components/WeightSelector';  // Uvozi komponento
+import WeightSelector from './components/WeightSelector'; 
 import CriteriaSelector from './components/CriteriaSelector';
 import PairwiseComparison from './components/PairwiseComparison';
 import ComparisonChart from './components/ComparisonChart';
@@ -19,13 +19,13 @@ const App = () => {
     employees: 0,
   });
   const [selectedCriteria, setSelectedCriteria] = useState([]);
-  const [wsmResults, setWsmResults] = useState([]);  // stanje za WSM rezultate
-  const [ahpResults, setAHPResults] = useState([]);  // stanje za AHP rezultate
-  const [prometheeResults, setPrometheeResults] = useState([]); // stanje za PROMETHEE rezultate
-  const [arasResults, setArasResults] = useState([]);  // stanje za WSM rezultate
+  const [wsmResults, setWsmResults] = useState([]);  // state for  WSM results
+  const [ahpResults, setAHPResults] = useState([]);  // state for  AHP results
+  const [prometheeResults, setPrometheeResults] = useState([]); // state for PROMETHEE results
+  const [arasResults, setArasResults] = useState([]);  // state for WSM 
 
   const [userInputs, setUserInputs] = useState({});
-  const [analysisReport, setAnalysisReport] = useState([]); // analiza vseh metod
+  const [analysisReport, setAnalysisReport] = useState([]); // analysis data for graph
   const analysisReportDemo = [
     { company: 'Walmart', WSM: 60, TOPSIS: 55, AHP: 70, PROMETHEE: 65 },
     { company: 'Amazon', WSM: 58, TOPSIS: 60, AHP: 68, PROMETHEE: 66 },
@@ -33,13 +33,13 @@ const App = () => {
   ];
   
   const [error, setError] = useState(null);
-  const [isBenefit, setIsBenefit] = useState({});  // Initialize isBenefit as an object
-  const [companyScores, setCompanyScores] = useState([]); // Dodano stanje za rezultate podjetij
+  const [isBenefit, setIsBenefit] = useState({});  // state for isBenefit
+  const [companyScores, setCompanyScores] = useState([]); // state for company scores
   const apiHost = process.env.REACT_APP_API_URL;
   console.log(apiHost);
 
   useEffect(() => {
-    // Pridobi podjetja iz našega Flask API-ja
+    // data from Flask API
     const fetchCompanies = async () => {
       try {
         const response = await axios.get(`${apiHost}/api/companies`);
@@ -51,7 +51,7 @@ const App = () => {
  fetchCompanies();
   }, []);
 
-    // Izračunaj in shrani rezultate podjetij po pridobitvi rezultatov AHP
+    /// Calculate and save the company results after obtaining the AHP results
     useEffect(() => {
       if (ahpResults.weights && selectedCriteria.length > 0) {
         const calculatedScores = calculateCompanyScores(selectedCompanies, ahpResults.weights);
@@ -72,7 +72,7 @@ const App = () => {
       const matrix = selectedCompanies.map((company) => {
         return selectedCriteria.map((criterion) => {
           const value = company[criterion];
-          return cleanValue(value); // Uporabi čistilno funkcijo
+          return cleanValue(value); // clean data
         });
       });
       return matrix;
@@ -90,7 +90,7 @@ const App = () => {
     const generateMatrixOld = (selectedCriteria, selectedCompanies) => {
       const matrix = selectedCompanies.map((company) => {
         return selectedCriteria.map((criterion) => {
-          const value = parseFloat(company[criterion]) || 0; // Dobimo vrednost za kriterij
+          const value = parseFloat(company[criterion]) || 0; // get criteria data
           return value;
         });
       });
@@ -101,8 +101,8 @@ const App = () => {
     const size = criteria.length;
     const matrix = Array.from({ length: size }, (_, i) =>
       Array.from({ length: size }, (_, j) => {
-        if (i === j) return 1; // Diagonalne vrednosti (kriterij v primerjavi sam s seboj)
-        return 1;              // Vse druge vrednosti nastavimo na 1
+        if (i === j) return 1; // calculate diagonal
+        return 1;              // other 1
       })
     );
     return matrix;
@@ -218,7 +218,7 @@ const App = () => {
     
     let apiUrl = '';
 
-    // Odvisno od izbrane metode določimo pravi API URL
+    // set API URL
     switch (selectedMethod) {
       case 'WSM':
         apiUrl = `${apiHost}/api/mcda/wsm`;
@@ -248,12 +248,10 @@ const App = () => {
     } else {
       console.log('Selected Criteria:', selectedCriteria);
       console.log('Selected Weights:', weights);
-
-      // Dodaj logiko za MCDA analizo
     }
 
 
-    // implementacija klicev na API za posamezne metode
+    // API calls for methods
     try {
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -270,15 +268,35 @@ const App = () => {
       const data = await response.json();
       console.log('Analysis Results:', data);
       // Dynamically update `analysisReport` with results for the current method
-    const updatedReport = selectedCompanies.map((company, index) => {
-      const existingEntry =
-        analysisReport.find((entry) => entry.company === company.name) || { company: company.name };
-
-      return {
-        ...existingEntry,
-        [selectedMethod]: data[index]?.score || 0, // Add or update the score for the selected method
-      };
-    });
+      const updatedReport = selectedCompanies.map((company, index) => {
+        const existingEntry =
+          analysisReport.find((entry) => entry.company === company.name) || { company: company.name };
+      
+        console.log('AHP SCORES COMPANY: ', companyScores);
+      
+        if (selectedMethod === 'AHP') {
+          // Check if companyScores is populated
+          if (companyScores.length === 0) {
+            console.warn('Company scores are not ready yet.');
+            return {
+              ...existingEntry,
+              [selectedMethod]: 0, // Placeholder score if companyScores is not ready
+            };
+          }
+      
+          const companyScore = companyScores[index]?.score || 0; // Use score if available
+          return {
+            ...existingEntry,
+            [selectedMethod]: companyScore, // Add AHP result
+          };
+        }
+      
+        // General case for other methods
+        return {
+          ...existingEntry,
+          [selectedMethod]: data[index]?.score || 0, // Add or update score for the selected method
+        };
+      });
 
     setAnalysisReport(updatedReport); // Update the analysis report
     console.log("Updated Analysis Report:", updatedReport);
@@ -286,7 +304,7 @@ const App = () => {
       console.log(analysisReport);
 
       if (selectedMethod === 'AHP') {
-        setAHPResults(data);  // Nastavi rezultate AHP metode
+        setAHPResults(data);  // set data for AHP
         console.log(data)
         console.log(wsmResults)
        
@@ -298,7 +316,7 @@ const App = () => {
         setArasResults(data);
       }
       else {
-        setWsmResults(data);  // Nastavi rezultate za WSM in TOPSIS metode
+        setWsmResults(data);  // set data for WSM in TOPSIS
       }
     } catch (error) {
       console.error('Error fetching WSM results:', error);
@@ -348,10 +366,10 @@ const App = () => {
       
       )}
 
-      {/* Izbor MCDA metode */}
+      {/* MCDA method pick */}
       
 
-     {/* Gumb za pošiljanje */}
+     {/* Start report button */}
      <div className="text-center">
         <button className="btn btn-primary btn-lg" onClick={handleSubmit}>
           Izvedi analizo
@@ -448,7 +466,7 @@ const App = () => {
   </div>
 )}
 <div className="chart mt-5">
-      {/* Drugi deli aplikacije */}
+      {/* Chart data display */}
       <h2>Primerjava rezultatov MCDA metod</h2>
       <ComparisonChart data={analysisReport} />
     </div>

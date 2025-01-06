@@ -12,21 +12,21 @@ def get_fortune500_companies():
         soup = BeautifulSoup(response.content, 'html.parser')
 
         companies = []
-        table_rows = soup.select('tbody tr')  # Izberemo vse vrstice tabele
+        table_rows = soup.select('tbody tr')  # Choose all rows
 
-        for row in table_rows[:20]:  # Pridobimo prvih 20 podjetij
+        for row in table_rows[:20]:  # select max 20 rows
             cells = row.find_all('td')
             if len(cells) > 0:
                 rank = cells[0].get_text(strip=True)  # Rang (1, 2, 3,...)
-                name = cells[1].get_text(strip=True)  # Ime podjetja (Walmart,...)
-                revenue = cells[2].get_text(strip=True)  # Prihodki (Revenue)
-                revenue_change = cells[3].get_text(strip=True)  # Sprememba prihodkov v %
-                profit = cells[4].get_text(strip=True)  # Dobiček (Profit)
-                profit_change = cells[5].get_text(strip=True)  # Sprememba dobička v %
-                assets = cells[6].get_text(strip=True)  # Sredstva
-                employees = cells[7].get_text(strip=True)  # Stevilo zaposlenih
-                rank_change = cells[8].get_text(strip=True)  # Sprememba ranga
-                years_in_rank = cells[9].get_text(strip=True)  # Stevilo let v rangu
+                name = cells[1].get_text(strip=True)  # Name (Walmart,...)
+                revenue = cells[2].get_text(strip=True)  # Revenue (Revenue)
+                revenue_change = cells[3].get_text(strip=True)  # Change of revenue %
+                profit = cells[4].get_text(strip=True)  # Profit (Profit)
+                profit_change = cells[5].get_text(strip=True)  # Change of profit v %
+                assets = cells[6].get_text(strip=True)  # Assets
+                employees = cells[7].get_text(strip=True)  # Employees
+                rank_change = cells[8].get_text(strip=True)  # Change of rang
+                years_in_rank = cells[9].get_text(strip=True)  # Years in rank
 
                 companies.append({
                     'rank': rank,
