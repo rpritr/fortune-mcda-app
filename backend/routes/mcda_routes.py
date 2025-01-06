@@ -6,7 +6,7 @@ import numpy as np
 mcda_routes = Blueprint('mcda_routes', __name__)
 calculations_collection = db.calculations
 
-# POST zahtevek za WSM metodo, prejme podatke in vstavi zapis v DB, vrne rezultat WSM metode
+# post for WSM, use data and insert record to DB, return WSM result
 @mcda_routes.route('/wsm', methods=['POST'])
 def wsm_api():
     data = request.json
@@ -16,7 +16,7 @@ def wsm_api():
     calculations_collection.insert_one({'method': 'WSM', 'companies': companies, 'weights': weights, 'results': results})
     return jsonify(results), 200
 
-# POST zahtevek za TOPSIS metodo, prejme podatke in vstavi zapis v DB, vrne rezultat WSM metode
+# post for TOPSIS, use data and insert record to DB, return TOPSIS result
 @mcda_routes.route('/topsis', methods=['POST'])
 def topsis_api():
     try:
@@ -70,7 +70,7 @@ def topsis_api():
         print("Error in TOPSIS API:", e)
         return jsonify({"error": str(e)}), 500
 
-# POST zahtevek za AHP metodo, prejme podatke in vstavi zapis v DB, vrne rezultat WSM metode
+# post for AHP, use data and insert record to DB, return AHP result
 @mcda_routes.route('/ahp', methods=['POST'])
 def ahp_api():
     try:
@@ -112,7 +112,8 @@ def ahp_api():
     except Exception as e:
         print("Error in AHP API:", e)
         return jsonify({'error': str(e)}), 500
-# POST zahtevek za PROMETHEE metodo, prejme podatke in vstavi zapis v DB, vrne rezultat WSM metode
+    
+# post for PROMETHEE, use data and insert record to DB, return PROMETHEE result
 @mcda_routes.route('/promethee', methods=['POST'])
 def promethee_api():
     try:
@@ -139,7 +140,8 @@ def promethee_api():
         return jsonify(response_data), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-    
+
+# post for ARAS, use data and insert record to DB, return ARAS result    
 @mcda_routes.route('/aras', methods=['POST'])
 def aras_api():
     try:

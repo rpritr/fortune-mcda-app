@@ -9,8 +9,8 @@ const getFortune500Companies = async () => {
 
     const companies = [];
 
-    // Tukaj moramo identificirati HTML strukturo strani in iz nje pridobiti podatke.
-    // Prilagodi selektorje glede na stran, da dobiš imena podjetij in druge podatke.
+// Here we need to identify the HTML structure of the page and extract data from it.
+// Adjust selectors based on the page to get company names and other data.
     $('.company-list-item').each((i, element) => {
       if (i < 20) { // Prvih 20 podjetij
         const company = $(element).find('.company-title').text().trim();

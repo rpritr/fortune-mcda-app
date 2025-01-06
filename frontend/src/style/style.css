@@ -1,23 +1,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
-/* Splošne nastavitve */
+/* Basic settings */
 body {
   font-family: 'Montserrat', sans-serif;
   background-color: #f8f9fa;
   margin: 0;
   padding: 0;
   color: #343a40;
-  line-height: 1.6; /* Boljša berljivost */
+  line-height: 1.6;
 }
 
-/* Kontejner */
 .container {
   max-width: 1200px;
   margin: auto;
   padding: 20px;
 }
 
-/* Naslovi */
+/* Headings */
 h1, h2 {
   color: #495057;
   text-align: center;
@@ -33,19 +32,19 @@ h2 {
   font-size: 1.8rem;
 }
 
-/* Kartice */
+/* Cards */
 .card {
   background-color: #ffffff;
   border: 1px solid #dee2e6;
-  border-radius: 12px; /* Bolj zaobljeni robovi */
+  border-radius: 12px; 
   margin-bottom: 20px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Poudarjen efekt sence */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .card:hover {
-  transform: translateY(-5px); /* Rahlo dvigne kartico ob hoverju */
+  transform: translateY(-5px); 
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
@@ -56,7 +55,7 @@ h2 {
   font-size: 1.3rem;
   font-weight: bold;
   color: #495057;
-  text-transform: uppercase; /* Vse črke velike */
+  text-transform: uppercase;
 }
 
 .card-body {
@@ -65,7 +64,7 @@ h2 {
   color: #6c757d;
 }
 
-/* Obrazci */
+/* Forms */
 label {
   font-size: 1rem;
   color: #495057;
@@ -83,7 +82,7 @@ select, input[type="number"] {
   border: 1px solid #ced4da;
   border-radius: 6px;
   width: 100%;
-  box-sizing: border-box; /* Boljša prilagoditev */
+  box-sizing: border-box; 
   margin-bottom: 10px;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -94,7 +93,7 @@ select:focus, input[type="number"]:focus {
   outline: none;
 }
 
-/* Gumbi */
+/* Buttons */
 button {
   margin-top: 20px;
 }
@@ -113,10 +112,10 @@ button {
 
 .btn-primary:hover {
   background-color: #0056b3;
-  transform: scale(1.05); /* Rahla povečava ob hoverju */
+  transform: scale(1.05); 
 }
 
-/* Tabele */
+/* Tables */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -134,19 +133,19 @@ table th {
   background-color: #f8f9fa;
   font-weight: bold;
   color: #495057;
-  text-transform: uppercase; /* Poudarek na glavi */
+  text-transform: uppercase; 
 }
 
 table tbody tr:hover {
-  background-color: #f1f3f5; /* Ozadje ob hoverju */
+  background-color: #f1f3f5; 
 }
 
-/* Stojnice */
+/* Columns */
 .column {
   margin-bottom: 10px;
 }
 
-/* Pairwise primerjave */
+/* Pairwise comaprisons */
 .pairwise-comparisons {
   margin: 20px 0;
 }
@@ -164,7 +163,7 @@ table tbody tr:hover {
   text-align: center;
 }
 
-/* Rezultati */
+/* Results */
 .results {
   background-color: #ffffff;
   border: 1px solid #dee2e6;
@@ -197,7 +196,7 @@ canvas {
   border-radius: 12px;
 }
 
-/* Responsivnost */
+/* Responsive */
 @media (max-width: 768px) {
   h1 {
     font-size: 2rem;

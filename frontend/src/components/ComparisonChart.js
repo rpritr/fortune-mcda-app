@@ -38,7 +38,7 @@ const ComparisonChart = ({ data }) => {
     },
     {
       label: 'ARAS',
-      data: data.map(item => item.PROMETHEE),
+      data: data.map(item => item.ARAS),
       backgroundColor: 'rgba(122, 123, 22, 0.6)',
     },
   ];
